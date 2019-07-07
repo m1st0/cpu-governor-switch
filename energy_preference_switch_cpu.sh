@@ -33,10 +33,10 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-GOVERNOR_LIST=`cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor`
+PREFERENCE_LIST=`cat /sys/devices/system/cpu/*/cpufreq/energy_performance_available_preferences`
 CPU=0
 DBUSREF=''
-GOVERNOR=''
+PREFERENCE=''
 
 function waitToRead() {
   sleep 0.5
@@ -52,39 +52,41 @@ function setDialog() {
   waitToRead
 }
 
-function setGovernor() {
+function ssetCpuEnergyPref() {
   #qdbus ${DBUSREF} setLabelText "CPU $1 on $2."
   #PROGRESS=$((`qdbus ${DBUSREF} Get "" "value"` + 1))
   #qdbus ${DBUSREF} Set "" "value" ${PROGRESS};
-  sudo cpupower -c $1 frequency-set -g $2
+  #sudo cpupower -c $1 frequency-set -g $2
+  sudo sh -c "echo $1 > /sys/devices/system/cpu/$2/cpufreq/energy_performance_preference"
   waitToRead
 }
 
-function verifyMinFreq() {
-  sudo sh -c "echo 400000 > /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq"
-  sudo sh -c "echo 400000 > /sys/devices/system/cpu/cpu1/cpufreq/scaling_min_freq"
-  sudo sh -c "echo 400000 > /sys/devices/system/cpu/cpu2/cpufreq/scaling_min_freq"
-  sudo sh -c "echo 400000 > /sys/devices/system/cpu/cpu3/cpufreq/scaling_min_freq"
-}
-
 #setDialog
-for CPUGOV in ${GOVERNOR_LIST}
+for CPUENERGY in ${PREFERENCE_LIST}
 do
-  case ${CPUGOV} in
-    performance)
-      #verifyMinFreq # Unnecessary unless you have cpufreq packages.
-      GOVERNOR='powersave'
+  case ${CPUENERGY} in
+    default)
+      PREFERENCE='default' 
       ;;
-    powersave)
-      GOVERNOR='performance'
+    performance)
+      PREFERENCE='performance'
+      ;;
+    balance_performance)
+      PREFERENCE='balance_performance'
+      ;;
+    balance_power)
+      PREFERENCE='balance_power'
+      ;;
+    power)
+      PREFERENCE='power'
       ;;
   esac
-  setGovernor ${CPU} ${GOVERNOR}
+  setCpuEnergyPref ${PREFERENCE} ${CPU}
   CPU=$((${CPU} + 1))
 done
-setDialog "CPU set to ${GOVERNOR}"
+setDialog "CPU set to ${PREFERENCE}"
 #qdbus ${DBUSREF} setLabelText "CPU settings finished."
 waitToRead
 waitToRead
 #qdbus ${DBUSREF} close
-logger `cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor`
+logger `cat /sys/devices/system/cpu/*/cpufreq/energy_performance_preference`
