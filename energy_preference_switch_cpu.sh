@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: Apache 2.0
+# SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2017-2026 Maulik Mistry <mistry01@gmail.com>
 #
 # Allows for switching governors in intel_pstate drivers in KDE.

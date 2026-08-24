@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: Apache 2.0
-# SPDX-FileCopyrightText: 2017-2026 Maulik Mistry <mistry01@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2017-2026 Maulik Mistry
 #
 # Allows for switching governors in intel_pstate drivers in KDE.
 #
@@ -11,8 +11,10 @@
 #                       https://venmo.com/code?user_id=3319592654995456106&created=1753283702
 
 
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-source ${SCRIPT_DIR}/bash_color_printf.sh
+# Using BASH_SOURCE for better path reliability in Bash
+SCRIPT_PATH="$(readlink -f -- "${BASH_SOURCE[0]}")"
+SCRIPT_DIR="$(dirname -- "$SCRIPT_PATH")"
+source "${SCRIPT_DIR}/vendor/tput_shell_colorize/tput_shell_colorize.sh"
 
 GOVERNOR_LIST=`cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor`
 CPU=0
